@@ -1,0 +1,627 @@
+/* Responsive Design */
+        @media (max-width: 768px) {
+            .landing-title h1 {
+                font-size: 2rem;
+            }
+            
+            .chat-messages {
+                height: calc(100vh - 160px);
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+            }
+        }        // Chat state
+        let conversationHistory = [];
+        let isTyping = false;<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InspireBot CEO - Your AI Business Mentor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Landing Page Styles */
+        .landing-page {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spiral-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            cursor: pointer;
+            transition: all 0.5s ease;
+        }
+
+        .spiral-container:hover {
+            transform: scale(1.1);
+        }
+
+        .spiral {
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            position: absolute;
+            animation: spiral-spin 4s linear infinite;
+        }
+
+        .spiral:nth-child(1) {
+            border-top-color: #ffd700;
+            border-right-color: #ffd700;
+            animation-delay: 0s;
+        }
+
+        .spiral:nth-child(2) {
+            border-bottom-color: #4a90e2;
+            border-left-color: #4a90e2;
+            animation-delay: -1s;
+            transform: scale(0.8);
+        }
+
+        .spiral:nth-child(3) {
+            border-top-color: #ffd700;
+            border-bottom-color: #ffd700;
+            animation-delay: -2s;
+            transform: scale(0.6);
+        }
+
+        @keyframes spiral-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ceo-avatar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: #000;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .landing-title {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            animation: fade-in-up 1s ease-out;
+        }
+
+        .landing-title h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffd700, #4a90e2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .landing-title p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Glass Shatter Effect */
+        .glass-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: none;
+        }
+
+        .glass-shard {
+            position: absolute;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            display: none;
+            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            position: relative;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .chat-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .chat-info h2 {
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .chat-info p {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .chat-messages {
+            height: calc(100vh - 200px);
+            overflow-y: auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: slide-in 0.5s ease-out;
+        }
+
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message-bubble.user {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-bubble.bot {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+            color: #ffffff;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-bottom-left-radius: 5px;
+        }
+
+        .bot-avatar-small {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            flex-shrink: 0;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 25px;
+            padding: 15px 20px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .send-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 15px;
+            color: #ffd700;
+            font-style: italic;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: typing-bounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing-bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Scrollbar Styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 3px;
+        }
+
+        /* Message Content Styling */
+        .message-content {
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .highlight-gold {
+            color: #ffd700;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .highlight-italic {
+            color: #4a90e2;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        .message-header {
+            color: #ffd700;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 10px 0;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 5px;
+        }
+
+        .message-subheader {
+            color: #4a90e2;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .quote-text {
+            color: #87ceeb;
+            font-style: italic;
+            background: rgba(135, 206, 235, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border-left: 3px solid #87ceeb;
+        }
+
+        .business-term {
+            color: #ffd700;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        .list-number {
+            color: #ffd700;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .bullet-point {
+            color: #4a90e2;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* Hidden class for transitions */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div class="landing-page" id="landingPage">
+        <div class="spiral-container" onclick="startChat()">
+            <div class="spiral"></div>
+            <div class="spiral"></div>
+            <div class="spiral"></div>
+            <div class="ceo-avatar">👨‍💼</div>
+        </div>
+        
+        <div class="landing-title">
+            <h1>InspireBot CEO</h1>
+            <p>Your AI Business Mentor & Visionary Guide</p>
+            <button class="start-button" onclick="startChat()">Start Your Journey</button>
+        </div>
+    </div>
+
+    <!-- Glass Shatter Overlay -->
+    <div class="glass-overlay" id="glassOverlay"></div>
+
+    <!-- Chat Interface -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <div class="chat-avatar">👨‍💼</div>
+            <div class="chat-info">
+                <h2>InspireBot CEO</h2>
+                <p>Your Visionary Business Mentor</p>
+            </div>
+            <div class="status-indicator"></div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="bot-avatar-small">👨‍💼</div>
+                <div class="message-bubble bot">
+                    <div class="message-content">Welcome to the <strong class="highlight-gold">executive suite</strong>! I'm <strong class="highlight-gold">InspireBot CEO</strong>, your personal business mentor in a digital suit. I'm here to ignite your entrepreneurial fire, share game-changing strategies, and help you think like a <span class="business-term">Fortune 500 CEO</span>. 
+
+                    <br><br>As <span class="quote-text">"Warren Buffett"</span> once said, <span class="quote-text">"The best investment you can make is in yourself."</span> So let's get started - what <span class="business-term">business</span> dreams are we turning into reality today?</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask me about business ideas, strategies, or inspiration..." onkeypress="handleKeyPress(event)">
+            <button class="send-button" id="sendButton" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const OPENROUTER_API_KEY = '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';
+        const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+        const MODEL = 'deepseek/deepseek-r1:free';
+
+        // System prompt for the AI
+        const SYSTEM_PROMPT = `You are 'InspireBot CEO', a visionary business AI mentor. Speak like a confident, successful entrepreneur wearing a sleek suit. Your mission is to inspire users with profitable business ideas, startup advice, motivational quotes, and empowering insights. Be bold, stylish, and visionary — like a top-level CEO coaching the next generation of leaders. Respond with clarity, energy, and a success-driven tone. Use inspiring language, famous business quotes, and practical strategies. Help users think big, act smart, and stay confident. Keep responses engaging and actionable.`;
+
+        // Format text with markdown-like styling
+        function formatText(text) {
+            // Convert markdown-style formatting to HTML
+            let formattedText = text
+                // Bold text: **text** or *text*
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="highlight-gold">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em class="highlight-italic">$1</em>')
+                // Headers: # Header
+                .replace(/^# (.*$)/gm, '<h3 class="message-header">$1</h3>')
+                .replace(/^## (.*$)/gm, '<h4 class="message-subheader">$1</h4>')
+                // Line breaks
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>')
+                // Quotes: "text"
+                .replace(/"([^"]+)"/g, '<span class="quote-text">"$1"</span>')
+                // Numbers at start of lines (lists)
+                .replace(/^(\d+\.\s)/gm, '<span class="list-number">$1</span>')
+                // Bullet points
+                .replace(/^[-•]\s/gm, '<span class="bullet-point">• </span>')
+                // Highlight important business terms
+                .replace(/\b(CEO|entrepreneur|business|startup|revenue|profit|strategy|vision|leadership|success|innovation|growth|market|opportunity|investment|ROI|KPI|MVP|B2B|B2C|SaaS|e-commerce|digital marketing|brand|customer|sales|funding|venture|IPO|scaling|disruption|competitive advantage)\b/gi, '<span class="business-term">$1</span>');
+            
+            return formattedText;
+        }
+
+        // Glass shatter animation
+        function createGlassShatter() {
+            const overlay = document.getElementById('glassOverlay');
+            overlay.style.display = 'block';
+            
+            // Create glass shards
+            for (let i = 0; i < 20; i++) {
+                const shard = document.createElement('div');
+                shard.className = 'glass-shard';
+                
+                // Random shard properties
+                const width = Math.random() * 100 + 50;
+                const height = Math.random() * 100 + 50;
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight;
+                const rotation = Math.random() * 360;
+                
+                shard.style.width = width + 'px';
+                shard.style.height = height + 'px';
+                shard.style.left = x + 'px';
+                shard.style.top = y + 'px';
+                shard.style.transform = `rotate(${rotation}deg)`;
+                shard.style.opacity = '0.8';
+                
+                overlay.appendChild(shard);
+                
+                // Animate shard
+                setTimeout(() => {
+                    shard.style.transition = 'all 1s ease-out';
+                    shard.style.transform = `rotate(${rotation + 180}deg) translate(${(Math.random() - 0.5) * 500}px, ${Math.random() * 300 + 100}px)`;
+                    shard.style.opacity = '0';
+                }, 100);
+            }
+            
+            // Remove overlay after animation
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                overlay.innerHTML = '';
+            }, 1200);
+        }
+
+        // Start chat function
+        function startChat() {
+            createGlassShatter();
+            
+            setTimeout(() => {
+                document.getElementById('landingPage').style.display = 'none';
+                document.getElementById('chatContainer').style.display = 'block';
+                document.getElementById('chatInput').focus();
+       
